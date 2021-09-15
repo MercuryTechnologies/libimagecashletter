@@ -11,7 +11,7 @@ import (
 )
 
 //export image_cash_letter_to_json
-func image_cash_letter_to_json(iclBytes unsafe.Pointer, n C.int) unsafe.Pointer {
+func image_cash_letter_to_json(iclBytes unsafe.Pointer, n C.int) *C.char {
 	buf := bytes.NewBuffer(C.GoBytes(iclBytes, n))
 
 	r := imagecashletter.NewReader(buf, imagecashletter.ReadVariableLineLengthOption())
@@ -33,7 +33,7 @@ func image_cash_letter_to_json(iclBytes unsafe.Pointer, n C.int) unsafe.Pointer 
 		return nil
 	}
 
-	return C.CBytes(jsonEncodedIclBuf.Bytes())
+	return C.CString(jsonEncodedIclBuf.String())
 }
 
 func main() {}

@@ -15,16 +15,16 @@ func image_cash_letter_to_json(iclBytes unsafe.Pointer, n C.int) *C.char {
 	buf := bytes.NewBuffer(C.GoBytes(iclBytes, n))
 
 	r := imagecashletter.NewReader(buf, imagecashletter.ReadVariableLineLengthOption())
-	iclFile, err := r.Read()
-	if err != nil {
+	iclFile, iclFileReadErr := r.Read()
+	if iclFileReadErr != nil {
 		return nil
 	}
 
-	if iclFile.Validate(); err != nil {
+	if err := iclFile.Validate(); err != nil {
 		return nil
 	}
 
-	if iclFile.Create(); err != nil {
+	if err := iclFile.Create(); err != nil {
 		return nil
 	}
 

@@ -1,4 +1,4 @@
-module github.com/intricate/libimagecashletter
+module github.com/mercurytechnologies/libimagecashletter
 
 go 1.13
 

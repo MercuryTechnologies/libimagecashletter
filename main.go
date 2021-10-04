@@ -1,5 +1,11 @@
 package main
 
+/*
+typedef enum {
+    ASCII_ENCODING = 0,
+    EBCDIC_ENCODING = 1
+} FileEncoding;
+*/
 import "C"
 
 import (
@@ -10,11 +16,34 @@ import (
 	"github.com/moov-io/imagecashletter"
 )
 
-//export image_cash_letter_to_json
-func image_cash_letter_to_json(iclBytes unsafe.Pointer, n C.int) *C.char {
+type FileEncoding int
+
+const (
+	ASCII_ENCODING FileEncoding = iota
+	EBCDIC_ENCODING
+)
+
+//export image_cash_letter_file_to_json
+func image_cash_letter_file_to_json(cFileEncoding C.FileEncoding, iclBytes unsafe.Pointer, n C.int) *C.char {
+	fileEncoding := FileEncoding(cFileEncoding)
 	buf := bytes.NewBuffer(C.GoBytes(iclBytes, n))
 
-	r := imagecashletter.NewReader(buf, imagecashletter.ReadVariableLineLengthOption())
+	readerOptions := []imagecashletter.ReaderOption{}
+	if fileEncoding == ASCII_ENCODING {
+		readerOptions = []imagecashletter.ReaderOption{
+			imagecashletter.ReadVariableLineLengthOption(),
+		}
+	} else if fileEncoding == EBCDIC_ENCODING {
+		readerOptions = []imagecashletter.ReaderOption{
+			imagecashletter.ReadVariableLineLengthOption(),
+			imagecashletter.ReadEbcdicEncodingOption(),
+		}
+	} else {
+		// An invalid file encoding was specified.
+		return nil
+	}
+
+	r := imagecashletter.NewReader(buf, readerOptions...)
 	iclFile, iclFileReadErr := r.Read()
 	if iclFileReadErr != nil {
 		return nil
